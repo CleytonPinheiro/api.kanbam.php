@@ -46,11 +46,10 @@ class Usuarios extends Model {
 			$sql->bindValue(':name', $name);
 			$sql->bindValue(':email', $email);
 			$sql->bindValue(':password', $hash);			
-			$sql->execute();
-			
+			$sql->execute();			
 			
 			$this->id_user = $this->db->lastInsertId();
-			
+						
 			return true;
 		} else {
 			return false;
@@ -76,7 +75,6 @@ class Usuarios extends Model {
 	}
 
 	public function checkCredentials($email, $password) {
-		
 		$sql = "SELECT id, password FROM user WHERE email = :email";
 		$sql = $this->db->prepare($sql);
 		$sql->bindValue(':email', $email);
@@ -86,15 +84,29 @@ class Usuarios extends Model {
 			$info = $sql->fetch();
 			
 			if(password_verify($password, $info['password'])) {
-				
-				$this->id_user = $info['id'];
+				//aqui
+				$this->id_user = intval($info['id']);
+				var_dump($this->id_user);
 				return true;
-			} else {
-				return false;
 			}
-		} else {	
-			return false;
 		}
+
+		return false;
+	}
+
+	public function getInfo($id) {
+		$array = array();
+
+		$sql = 'SELECT id, name, email FROM user WHERE id = :id';
+		$sql = $this->db->prepare($sql);
+		$sql->bindValue(':id', $id);
+		$sql->execute();
+
+		if($sql->rowCount() > 0) {
+			$array = $sql->fetch(\PDO::FETCH_ASSOC);
+		}
+
+		return $array;
 	}
 
 	public function getId() {

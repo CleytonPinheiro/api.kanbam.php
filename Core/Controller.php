@@ -14,6 +14,14 @@ class Controller {
 				return $_GET;
 				break;
 			case 'PUT':
+				$data = json_decode(file_get_contents('php://input'));
+
+				if(is_null($data)) {
+					$data = $_POST;
+				}
+
+				return (array) $data;
+				break;
 			case 'DELETE':
 				parse_str(file_get_contents('php://input'), $data);
 				return (array) $data;
@@ -28,12 +36,10 @@ class Controller {
 				return (array) $data;
 				break;
 		}
-
 	}
 
 	public function returnJson($array, $statusCode = 200) {
 		header("Content-Type: application/json");
-		//http_response_code($statusCode);
 		echo json_encode($array);
 		exit;
 	}

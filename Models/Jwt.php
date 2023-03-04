@@ -28,8 +28,6 @@ class Jwt extends Model {
 		global $config;
 		$array = array();
 
-		var_dump($jwt);
-
 		$jwt_splits = explode('.', $jwt);
 		
 		if(count($jwt_splits) == 3) {

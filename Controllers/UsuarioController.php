@@ -61,25 +61,32 @@ class UsuarioController extends Controller {
 
         $this->returnJson($array);
     }
-
     
     public function userById($id) {
-        $array = array('error' => '');
+        $array = array('error' => '', 'logged' => false);
 
         $method = $this->getMethod();
+        $data = $this->getRequestData();
 
-        if($method == 'GET') {
-            $usuarios = new Usuarios();
-            $usuario = $usuarios->userById($id);
+        $user = new Usuarios();
+        
+        if(!empty($data['jwt']) && $user->validateJwt($data['jwt'])) {
+            $array['logged'] = true;
+            $array['is_me'] =  false;
 
-            if($usuario) {                
-                $this->returnJson($usuario, 200);
-            } else {
-                $array['error'] = 'Usuário não encontrado.';
+            if($id == $user->getId()) {
+                $array['is_me'] = true;
             }
-        } else {
-            http_response_code(501);
-            $array['error'] = 'Método de requisição incompatível.';
+
+            if($method === 'GET') {
+                $array['data'] = $user->getInfo($id);
+
+                if(count($array['data']) === 0) {
+                    $array['error'] = 'Usuário não existe.';
+                }
+            } else {
+                $array['error'] = 'Método '.$method.' não disponível.';
+            }
         }
 
         $this->returnJson($array);

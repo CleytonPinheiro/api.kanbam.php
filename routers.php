@@ -8,6 +8,9 @@ $routes['/usuarios/list'] = '/usuario/index';
 $routes['/usuarios/{id}'] = '/usuario/userById/:id';
 
 
-$routes['tarefas'] = '/tarefa/index';
-$routes['/tarefas/new'] = '/tarefas/addTarefa';
-$routes['/tarefas/{id}/user'] = '/tarefas/user/:id';
+$routes['/tarefas'] = '/tarefa/getTaskByUser';
+$routes['/tarefas/new'] = '/tarefa/newTask';
+$routes['/tarefas/{id}'] = '/tarefa/taskById/:id';
+$routes['/tarefas/delete/{id}'] = '/tarefa/deleteTask/:id';
+$routes['/tarefas/update/{id}'] = '/tarefa/updateTask/:id';
+
