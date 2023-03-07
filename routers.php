@@ -7,6 +7,10 @@ $routes['/usuarios/login'] = '/usuario/login';
 $routes['/usuarios/list'] = '/usuario/index';
 $routes['/usuarios/{id}'] = '/usuario/userById/:id';
 
+$routes['/quadros'] = '/quadro/getQuadroByUser';
+$routes['/quadros/new'] = '/quadro/newQuadro';
+$routes['/quadros/delete/{id}'] = '/quadro/deleteQuadro/:id';
+$routes['/quadros/update/{id}'] = '/quadro/updateQuadro/:id';
 
 $routes['/tarefas'] = '/tarefa/getTaskByUser';
 $routes['/tarefas/new'] = '/tarefa/newTask';

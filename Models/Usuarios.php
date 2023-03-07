@@ -81,12 +81,10 @@ class Usuarios extends Model {
 		$sql->execute();
 		
 		if($sql->rowCount() > 0) {
-			$info = $sql->fetch();
+			$info = $sql->fetch(\PDO::FETCH_ASSOC);
 			
-			if(password_verify($password, $info['password'])) {
-				//aqui
+			if(password_verify($password, $info['password'])) {				
 				$this->id_user = intval($info['id']);
-				var_dump($this->id_user);
 				return true;
 			}
 		}
@@ -110,7 +108,7 @@ class Usuarios extends Model {
 	}
 
 	public function getId() {
-		return $this->id_user;
+		return intval($this->id_user);
 	}
 
 	private function emailExiste($email) {

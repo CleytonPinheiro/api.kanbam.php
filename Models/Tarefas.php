@@ -20,7 +20,7 @@ class Tarefas extends Model {
 
 	public function getTaskByUser(int $idUser) {
 
-		$sql = "SELECT tarefa, status, prazo FROM tarefa WHERE id_user = :id_user ORDER BY tarefa";
+		$sql = 'SELECT * FROM tarefa INNER JOIN quadros ON tarefa.id_quadro = quadros.id WHERE tarefa.id_user = :id_user';
 
 		$sql = $this->db->prepare($sql);
 		$sql->bindValue(':id_user', $idUser);
@@ -33,30 +33,31 @@ class Tarefas extends Model {
 		}
 	}
 
-	public function addTarefa($tarefa, $prazo, $status, int $id_user) {
+	public function addTarefa($tarefa, $prazo, $status,int $id_quadro = null, int $id_user) {
 
-		$sql = 'INSERT INTO tarefa (tarefa, prazo, status, id_user, created_at) VALUES (:tarefa, :prazo, :status, :id_user, now())';
+		if(!$id_quadro) {
+			$sql = 'INSERT INTO tarefa (tarefa, prazo, status, id_user, created_at) VALUES (:tarefa, :prazo, :status, :id_user, now())';
 
-		$sql = $this->db->prepare($sql);
-		$sql->bindValue(':tarefa', $tarefa);
-		$sql->bindValue(':prazo', $prazo);
-		$sql->bindValue('status', $status);
-		$sql->bindValue('id_user', $id_user);
-		$sql->execute();
+			$sql = $this->db->prepare($sql);
+			$sql->bindValue(':tarefa', $tarefa);
+			$sql->bindValue(':prazo', $prazo);
+			$sql->bindValue('status', $status);
+			$sql->bindValue('id_user', $id_user);	
+			$sql->execute();
 
-		if($sql->rowCount() > 0) {
-			return $sql->fetch(\PDO::FETCH_ASSOC);
-		} else {
-			return false;
-		}
+			if($sql->rowCount() > 0) {
+				return $sql->fetch(\PDO::FETCH_ASSOC);
+			} else {
+				return false;
+			}
+		}	
 	}
 
-	public function taskById(int $id, int $idUserLogged) {
+	public function taskById(int $id) {
 		
-		$sql = "SELECT tarefa, status, prazo FROM tarefa WHERE id = :id AND id_user = :id_user";
+		$sql = "SELECT tarefa, status, prazo FROM tarefa WHERE id = :id";
 
 		$sql = $this->db->prepare($sql);
-		$sql->bindValue(':id_user', $idUserLogged);
 		$sql->bindValue(':id', $id);
 		$sql->execute();
 	
@@ -67,15 +68,14 @@ class Tarefas extends Model {
 		}
 	}
 
-	public function updateTask(int $id, $task,int $idUserLogged) {
-
-		$sql = "UPDATE tarefa SET tarefa = :tarefa, status = :status, prazo = :prazo WHERE id = :id AND id_user = :id_user";
+	public function updateTask(int $id, $task) {
+		
+		$sql = "UPDATE tarefa SET tarefa = :tarefa, status = :status, prazo = :prazo WHERE id = :id";
 
 		$sql = $this->db->prepare($sql);
 		$sql->bindValue(':tarefa', $task['tarefa']);
 		$sql->bindValue(':status', $task['status']);
 		$sql->bindValue(':prazo', $task['prazo']);
-		$sql->bindValue(':id_user', $idUserLogged);
 		$sql->bindValue(':id', $id);
 		$sql->execute();
 

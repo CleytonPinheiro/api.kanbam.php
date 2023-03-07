@@ -2,12 +2,12 @@
 namespace Controllers;
 
 use Core\Controller;
-use Models\Tarefas;
+use Models\Quadros;
 use Models\Usuarios;
 
-class TarefaController extends Controller {
+class QuadroController extends Controller{
 
-    public function index() {
+    public function getQuadroByUser() {
         $array = array('error' => '');
 
         $method = $this->getMethod();
@@ -17,7 +17,7 @@ class TarefaController extends Controller {
 
         if(!empty($data['jwt']) && $user->validateJwt($data['jwt'])) {
             if($method == 'GET') {
-                $tarefas = new Tarefas();
+                $quadro = new Quadros();
                 $usuario = new Usuarios();
 
                 $usuario->validateJwt($_GET["jwt"] ?? null);
@@ -25,14 +25,13 @@ class TarefaController extends Controller {
 
                 if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
 
-                $tarefas = $tarefas->getAll();
-
-                if($tarefas > 0) {      
-                                  
-                    $this->returnJson($tarefas);
+                $quadros = $quadro->getQuadroByUser($idUserLogged);
+                
+                if($quadros) {
+                    $this->returnJson($quadros);
                 } else {
-                    $array['error'] = 'Não existe tarefa cadastrado.';
-                }
+                    $array['error'] = 'Não existe quadro cadastrado.';
+                }         
             } else {
                 http_response_code(501);
                 $array['error'] = 'Método requisição incompatível.';
@@ -41,58 +40,30 @@ class TarefaController extends Controller {
             $array['error'] = 'Acesso negado.';
         }
 
-        $this->returnJson($array);       
-    }
-
-    public function getTaskByUser() {
-        $array = array('error' => '');
-
-        $method = $this->getMethod();
-
-        if($method == 'GET') {
-            $tarefa = new Tarefas();
-            $usuario = new Usuarios();
-            
-            $usuario->validateJwt($_GET["jwt"] ?? null);
-            $idUserLogged = intval($usuario->getId());
-
-            if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
-
-            $dataTasks = $tarefa->getTaskByUser($idUserLogged);
-
-            $this->returnJson($dataTasks);
-
-            if($dataTasks > 0) {                                
-                $this->returnJson($dataTasks);
-            } else {
-                $array['error'] = 'Não existe tarefa cadastrado.';
-            }
-        } else {
-            $array['error'] = 'Método de requisição incompatível.';
-        }
-
         $this->returnJson($array);
     }
-    
-    public function newTask() {
+
+    public function newQuadro() {
         $array = array('error' => '');
 
         $method = $this->getMethod();
         $data = $this->getRequestData();
 
         if($method == 'POST') {
-            if(!empty($data['tarefa']) && !empty($data['prazo'])) {
-                $tarefa = new Tarefas();
+            if(!empty($data['description'])) {
                 $usuario = new Usuarios();
-             
+                $quadro = new Quadros();
+
                 $usuario->validateJwt($_GET["jwt"] ?? null);
-                $idUserLogged = intval($usuario->getId());
+                $idUserLogged = $usuario->getId();
 
-                if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);               
+                if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
                 
-                $data['status'] != '' ? $data['status'] =  $data['status'] :  $data['status'] = 'Em andamento';
+                $data['description'] != '' ? $data['description'] =  $data['description'] :  $data['description'] = 'Em analise';
 
-                $this->returnJson($data);                
+                $quadro->addQuadro($data['description'], $idUserLogged);
+
+                $this->returnJson($data);
             }
         } else {
             $array['error'] = 'Método de requisição incompatível.';
@@ -101,60 +72,38 @@ class TarefaController extends Controller {
         $this->returnJson($array);
     }
 
-    public function taskById(int $id) {
+    public function getQuadroById($id) {
         $array = array('error' => '');
 
         $method = $this->getMethod();
 
-        if($method === 'GET') {
-            $tarefa = new Tarefas();
+        if($method == 'GET') {
+            $quadro = new Quadros();
             $usuario = new Usuarios();
 
             $usuario->validateJwt($_GET["jwt"] ?? null);
             $idUserLogged = intval($usuario->getId());
 
             if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
-          
-            if($idUserLogged) {
-                $array = $tarefa->taskById($id, $idUserLogged);
-            }
+
+            $quadro = $quadro->getQuadroById($id, $idUserLogged);
+
+            $this->returnJson($quadro);                 
         } else {
             $array['error'] = 'Método de requisição incompatível.';
         }
-
+        
         $this->returnJson($array);
-	}
+    }
 
-    public function deleteTask(int $id) {
-        $array = array('error' => '');
-
-        $method = $this->getMethod();
-
-        if($method == 'DELETE') {
-            $tarefa = new Tarefas();
-            $usuario = new Usuarios();
-
-            $usuario->validateJwt($_GET["jwt"] ?? null);
-            $idUserLogged = intval($usuario->getId());
-
-            if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
-              
-            if($idUserLogged) $tarefa->deleteTask($id, $idUserLogged);
-
-            $array['msg'] = 'Deletado com sucesso.';
-        } else {
-            $array['error'] = 'Método de requisição incompatível.';
-        }
-	}
-
-    public function updateTask(int $idTask) {
+    public function updateQuadro(int $idQuadro) {
         $array = array('error' => '');
 
         $method = $this->getMethod();
         $data = $this->getRequestData();
     
         if($method == 'PUT') {
-            $tarefa = new Tarefas();
+            $quadro = new Quadros();
             $usuario = new Usuarios();
 
             $usuario->validateJwt($_GET["jwt"] ?? null);
@@ -162,15 +111,40 @@ class TarefaController extends Controller {
 
             if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
             
-            if($idUserLogged) $tarefa->updateTask($idTask, $data, $idUserLogged);
+            if($idUserLogged) $quadro->updateQuadro($idQuadro, $data);
 
-            $task = $tarefa->taskById($idTask, $idUserLogged);
+            $quadro = $quadro->getQuadroById($idQuadro);
 
-            $this->returnJson($task);
+            $this->returnJson($quadro);
         } else {
             $array['error'] = 'Método de requisição incompatível.';
         }
 
         $this->returnJson($array);
     }
-}
+
+
+    public function deleteQuadro(int $id) {
+        $array = array('error' => '');
+
+        $method = $this->getMethod();
+
+        if($method == 'DELETE') {
+            $quadro = new Quadros();
+            $usuario = new Usuarios();
+
+            $usuario->validateJwt($_GET["jwt"] ?? null);
+            $idUserLogged = intval($usuario->getId());
+
+            if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
+
+            if($idUserLogged) $quadro->deleteQuadro($id, $idUserLogged);
+
+            $array['msg'] = 'Quadro deletado com sucesso.';             
+        } else {
+            $array['error'] = 'Método de requisição incompatível.';
+        }
+
+        $this->returnJson($array);
+    }
+}   
