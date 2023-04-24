@@ -30,7 +30,9 @@ class Quadros extends Model {
 		$sql->bindValue(':id_user', $id_user);
 		$sql->execute();
 
-		if($sql->rowCount() == 1) {
+		return $this->db->lastInsertId();
+
+		if($sql->rowCount() > 0) {
 			return $sql->fetch(\PDO::FETCH_ASSOC);
 		} else {
 			return false;
@@ -39,14 +41,15 @@ class Quadros extends Model {
 
 	public function deleteQuadro(int $id, int $idUser) {
 		
-		$sql = "DELETE FROM quadros WHERE id = :id";
+		$sql = "DELETE FROM quadros WHERE id = :id AND id_user = :id_user";
 
 		$sql = $this->db->prepare($sql);
 		$sql->bindValue(':id', $id);
+		$sql->bindValue(':id_user', $idUser);
 		$sql->execute();
 
 		if($sql->rowCount() > 0) {
-			return $sql->fetch(\PDO::FETCH_ASSOC);
+			return true;
 		} else {
 			return false;
 		}

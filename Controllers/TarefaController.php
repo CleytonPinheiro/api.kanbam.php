@@ -44,6 +44,34 @@ class TarefaController extends Controller {
         $this->returnJson($array);       
     }
 
+    public function tasksByCard(int $idCard) {
+        $array = array('error' => '');
+
+        $method = $this->getMethod();
+
+        if($method == 'GET') {
+            $tarefa = new Tarefas();
+            $usuario = new Usuarios();
+            
+            $usuario->validateJwt($_GET["jwt"] ?? null);
+            $idUserLogged = intval($usuario->getId());
+
+            if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
+
+            $dataTasks = $tarefa->tasksByCard($idUserLogged, $idCard);
+
+            if($dataTasks > 0) {                                
+                $this->returnJson($dataTasks);
+            } else {
+                $array['error'] = 'Não existe tarefa cadastrado.';
+            }
+        } else {
+            $array['error'] = 'Método de requisição incompatível.';
+        }
+
+        $this->returnJson($array);
+    }
+
     public function getTaskByUser() {
         $array = array('error' => '');
 
@@ -81,18 +109,24 @@ class TarefaController extends Controller {
         $data = $this->getRequestData();
 
         if($method == 'POST') {
-            if(!empty($data['tarefa']) && !empty($data['prazo'])) {
+            if(!empty($data['tarefa'])) {
                 $tarefa = new Tarefas();
                 $usuario = new Usuarios();
              
                 $usuario->validateJwt($_GET["jwt"] ?? null);
                 $idUserLogged = intval($usuario->getId());
 
-                if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);               
-                
-                $data['status'] != '' ? $data['status'] =  $data['status'] :  $data['status'] = 'Em andamento';
+                if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
 
-                $this->returnJson($data);                
+                $id_quadro = intval($data['id_quadro']);
+
+                if($id_quadro) {
+                    $task = $tarefa->addTarefa(strtolower($data['tarefa']), $id_quadro, $idUserLogged);
+                } else {
+                    $array['error'] = 'Campo obrigatório.';
+                }
+                
+                $this->returnJson(['idTask' => $task, 'data' =>  $data ] );    
             }
         } else {
             $array['error'] = 'Método de requisição incompatível.';
@@ -152,7 +186,7 @@ class TarefaController extends Controller {
 
         $method = $this->getMethod();
         $data = $this->getRequestData();
-    
+
         if($method == 'PUT') {
             $tarefa = new Tarefas();
             $usuario = new Usuarios();
@@ -161,12 +195,35 @@ class TarefaController extends Controller {
             $idUserLogged = intval($usuario->getId());
 
             if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
+
+            if($idUserLogged) $tarefa->updateTask($idTask, $data['tarefa'], $idUserLogged, $data['id_quadro']);
             
-            if($idUserLogged) $tarefa->updateTask($idTask, $data, $idUserLogged);
+            $this->returnJson($data);
+        } else {
+            $array['error'] = 'Método de requisição incompatível.';
+        }
 
-            $task = $tarefa->taskById($idTask, $idUserLogged);
+        $this->returnJson($array);
+    }
 
-            $this->returnJson($task);
+    public function changeCard(int $idTask) {
+        $array = array('error' => '');
+
+        $method = $this->getMethod();
+        $data = $this->getRequestData();
+
+        if($method == 'PATCH') {
+            $tarefa = new Tarefas();
+            $usuario = new Usuarios();
+
+            $usuario->validateJwt($_GET["jwt"] ?? null);
+            $idUserLogged = intval($usuario->getId());
+
+            if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
+
+            if($idUserLogged) $tarefa->changeCard($idTask, $data['id_quadro']);
+            
+            $this->returnJson($data);
         } else {
             $array['error'] = 'Método de requisição incompatível.';
         }

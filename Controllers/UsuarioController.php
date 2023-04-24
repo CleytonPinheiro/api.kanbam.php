@@ -43,19 +43,15 @@ class UsuarioController extends Controller {
 
                         $array['jwt'] = $usuarios->createJwt();
                     } else {
-                        http_response_code(401);
                         $array['error'] = 'Email já cadastrado.';
                     }
                 } else {
-                    http_response_code(400);
                     $array['erro'] = 'Email inválido.';
                 }
             } else {
-                http_response_code(400);
                 $array['error'] = 'Dados não preenchidos.';
             }
         } else {
-            http_response_code(501);
             $array['error'] = 'Método requisição incompatível.';
         }
 
@@ -97,7 +93,7 @@ class UsuarioController extends Controller {
 
         $method = $this->getMethod();
         $data = $this->getRequestData();
-
+        
         if($method == 'POST') {
             if(!empty($data['email']) && !empty($data['password'])) {
                 $usuarios = new Usuarios();
@@ -109,15 +105,12 @@ class UsuarioController extends Controller {
                     $array['error'] = 'Acesso negado.';
                 }
             } else {
-                http_response_code(500);
                 $array['error'] = 'Email e/ou senha obrigatórios.';
             }
         } else {
-            http_response_code(501);
             $array['error'] = 'Método de requisição incompatível.';
         }
-
+    
         $this->returnJson($array);
     }
 }
-

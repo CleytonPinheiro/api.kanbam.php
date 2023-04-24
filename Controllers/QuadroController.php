@@ -61,9 +61,9 @@ class QuadroController extends Controller{
                 
                 $data['description'] != '' ? $data['description'] =  $data['description'] :  $data['description'] = 'Em analise';
 
-                $quadro->addQuadro($data['description'], $idUserLogged);
+                $idLastInserted =  $quadro->addQuadro($data['description'], $idUserLogged);
 
-                $this->returnJson($data);
+                $this->returnJson(['id'=> $idLastInserted, 'description' => $data['description'] ]);
             }
         } else {
             $array['error'] = 'Método de requisição incompatível.';
@@ -139,8 +139,8 @@ class QuadroController extends Controller{
             if(!$idUserLogged) return $this->returnJson(["error" => "Acesso não autorizado."]);
 
             if($idUserLogged) $quadro->deleteQuadro($id, $idUserLogged);
-
-            $array['msg'] = 'Quadro deletado com sucesso.';             
+            
+            return $this->returnJson(["msg" => 'Deletado com sucesso.']);
         } else {
             $array['error'] = 'Método de requisição incompatível.';
         }

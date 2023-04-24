@@ -75,7 +75,9 @@ class Usuarios extends Model {
 	}
 
 	public function checkCredentials($email, $password) {
+
 		$sql = "SELECT id, password FROM user WHERE email = :email";
+		
 		$sql = $this->db->prepare($sql);
 		$sql->bindValue(':email', $email);
 		$sql->execute();

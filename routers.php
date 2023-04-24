@@ -15,6 +15,7 @@ $routes['/quadros/update/{id}'] = '/quadro/updateQuadro/:id';
 $routes['/tarefas'] = '/tarefa/getTaskByUser';
 $routes['/tarefas/new'] = '/tarefa/newTask';
 $routes['/tarefas/{id}'] = '/tarefa/taskById/:id';
+$routes['/tarefas/change/{id}'] = '/tarefa/changeCard/:id';
+$routes['/tarefas/card/{id}'] = '/tarefa/tasksByCard/:id';
 $routes['/tarefas/delete/{id}'] = '/tarefa/deleteTask/:id';
 $routes['/tarefas/update/{id}'] = '/tarefa/updateTask/:id';
-
